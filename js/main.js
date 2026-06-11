@@ -680,6 +680,59 @@
 
     }; // end ssSmoothScroll
 
+    const setupMenu = async function() {
+        const sheetId = '1MVQBvqDc0PiZ-INTInK85ZoZLuXOQZqFIlxS9-wvkio';
+        const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq`;
+        const pattern = /google\.visualization\.Query\.setResponse\((.*)\);/;
+        const categories = {
+            "Puto": "menu-list-puto",
+            "Kutsinta": "menu-list-kutsinta",
+            "Malagkit": "menu-list-malagkit",
+            "Pudding": "menu-list-pudding",
+            "Bibingka": "menu-list-bibingka",
+            "Cake": "menu-list-cake",
+            "Cookie": "menu-list-cookie",
+            "Salad": "menu-list-salad",
+            "Drink": "menu-list-drink",
+            "Extra": "menu-list-extra"
+        };
+        try {
+            const response = await fetch(url);
+            const text = await response.text();
+            const match = text.match(pattern);
+            console.log(match[0]);
+            console.log(match[1]);
+            const jsonText = match[1];
+            const data = JSON.parse(jsonText).table.rows;
+            console.log(data);
+            data.forEach(row => {
+                if (row.c[0] !== null && row.c[1] !== null && row.c[4] !== null && row.c[9] !== null) {
+                    const name = row.c[0].v ?? "";
+                    const desc = row.c[1].v ?? "";
+                    const price = row.c[4].f ?? "";
+                    const category = row.c[9].v ?? "";
+                    const catId = categories[category];
+                    const catList = document.getElementById(catId);
+                    catList.innerHTML += `
+                        <li class="menu-list__item">
+                            <div class="menu-list__item-desc">                                            
+                                <h4>${name}</h4>
+                                <p>
+                                    ${desc}
+                                </p>
+                            </div>
+                            <div class="menu-list__item-price">
+                                <span>&#x20B1;</span>${price}
+                            </div>
+                        </li>
+                    `;
+                }
+            });
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
 
    /* Initialize
     * ------------------------------------------------------ */
@@ -695,7 +748,8 @@
         ssMailChimpForm();
         ssAlertBoxes();
         ssSmoothScroll();
-
+        
+        setupMenu();
     })();
 
 })(document.documentElement);
